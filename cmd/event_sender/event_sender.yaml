@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fanout-sidecar-config
+  namespace: default
+data:
+  subscriptions: |
+    - callDomain: foo.config-map
+      toDomain: bar.config-map
+    - callDomain: only-call-domain
+    - toDomain: only-to-domain
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eventsender
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels: &labels
+      app: eventsender
+  template:
+    metadata:
+      labels: *labels
+    spec:
+      containers:
+        - name: eventsender
+          image: github.com/knative/playground/cmd/event_sender
+        - name: fanout-sidecar
+          image: github.com/knative/eventing/cmd/sidecar/fanout
+          ports:
+            - containerPort: 11235
+          volumeMounts:
+            - name: config-map
+              readOnly: true
+              mountPath: /etc/config/fanout_sidecar
+      volumes:
+        - name: config-map
+          configMap:
+            name: fanout-sidecar-config
