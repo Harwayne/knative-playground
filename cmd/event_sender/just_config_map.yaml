@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fanout-sidecar-config
+  namespace: default
+data:
+  subscriptions: |
+    - toDomain: message-dumper-foo.default.svc.cluster.local
+    - toDomain: message-dumper-bar.default.svc.cluster.local
+      callDomain: event-changer.default.svc.cluster.local
+

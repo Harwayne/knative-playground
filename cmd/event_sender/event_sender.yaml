@@ -5,10 +5,10 @@ metadata:
   namespace: default
 data:
   subscriptions: |
-    - callDomain: foo.config-map
-      toDomain: bar.config-map
-    - callDomain: only-call-domain
-    - toDomain: only-to-domain
+    - callDomain: event-changer.default.svc.cluster.local
+      toDomain: message-dumper-bar.default.svc.cluster.local
+    - callDomain: message-dumper-foo.default.svc.cluster.local
+    - toDomain: message-dumper-bar.default.svc.cluster.local
 
 ---
 
