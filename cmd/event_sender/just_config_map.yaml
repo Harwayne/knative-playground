@@ -10,18 +10,18 @@ data:
         name: c1
         fanoutConfig:
           subscriptions:
-            - callDomain: event-changer.default.svc.cluster.local
-              toDomain: message-dumper-bar.default.svc.cluster.local
-            - callDomain: message-dumper-foo.default.svc.cluster.local
-            - toDomain: message-dumper-bar.default.svc.cluster.local
+            - callableDomain: event-changer.default.svc.cluster.local
+              sinkableDomain: message-dumper-bar.default.svc.cluster.local
+            - callableDomain: message-dumper-foo.default.svc.cluster.local
+            - sinkableDomain: message-dumper-bar.default.svc.cluster.local
       - namespace: default
         name: c2
         fanoutConfig:
           subscriptions:
-            - toDomain: message-dumper-foo.default.svc.cluster.local
+            - sinkableDomain: message-dumper-foo.default.svc.cluster.local
       - namespace: other
         name: c3
         fanoutConfig:
           subscriptions:
-            - toDomain: message-dumper-foo.default.svc.cluster.local
+            - sinkableDomain: message-dumper-foo.default.svc.cluster.local
 

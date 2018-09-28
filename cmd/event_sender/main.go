@@ -16,7 +16,7 @@ const (
 )
 
 var (
-	channels = []string{"default/c1", "default/c2", "other/c3"}
+	channels = []string{"c1.default", "c2.default", "c3.other"}
 )
 
 func main() {
@@ -36,7 +36,8 @@ func sendRequest(channel string) {
 		log.Printf("Unable to create request: %v, %+v", id, err)
 		return
 	}
-	req.Header = headers(channel, id)
+	req.Header = headers(id)
+	req.Host = channel
 
 	client := http.Client{}
 	resp, err := client.Do(req)
@@ -48,10 +49,10 @@ func sendRequest(channel string) {
 	log.Printf("Request made successfully: %v, %+v", id, resp)
 }
 
-func headers(channel string, id uuid.UUID) http.Header {
+func headers(id uuid.UUID) http.Header {
 	h := http.Header{}
-	h.Add("X-Channel-Key", channel)
 	h.Add("X-Playground-Unique-Id", id.String())
+	h.Add("Knative-Playground-Unique-Id", id.String())
 	return h
 }
 
