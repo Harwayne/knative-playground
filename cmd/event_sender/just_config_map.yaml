@@ -1,8 +1,8 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: fanout-sidecar-config
-  namespace: default
+  name: in-memory-bus-config
+  namespace: knative-eventing
 data:
   multiChannelFanoutConfig: |
     channelConfigs:

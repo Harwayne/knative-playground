@@ -1,8 +1,6 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: fanout-sidecar-config
-  namespace: default
   name: in-memory-bus-config
   namespace: knative-eventing
 data:
@@ -39,6 +37,7 @@ spec:
     metadata:
       labels: *labels
     spec:
+      serviceAccountName: feed-sa
       containers:
         - name: eventsender
           image: github.com/knative/playground/cmd/event_sender
@@ -46,16 +45,8 @@ spec:
           image: github.com/knative/eventing/cmd/fanoutsidecar
           args: [
             "--sidecar_port=11235",
-            "--config_map_noticer=volume",
+            "--config_map_noticer=watcher",
           ]
           ports:
             - containerPort: 11235
-          volumeMounts:
-            - name: config-map
-              readOnly: true
-              mountPath: /etc/config/fanout_sidecar
-      volumes:
-        - name: config-map
-          configMap:
-            name: in-memory-bus-config
-            namespace: knative-eventing
+
