@@ -6,28 +6,50 @@ metadata:
 spec:
   provisioner:
     ...
+  selector:
+    matchLabels:
+      link-label: source-in
 
 ---
 
-apiVersion: eventing.knative.dev/v1alpha1
-kind: Subscription
+apiVersion: eip.eventing.knative.dev/v1alpha1
+kind: Link
+metadata:
+  name: source-link
+  namespace: default
+  labels:
+    link-label: source-in
+spec:
+  sink:
+    apiVersion: eip.eventing.knative.dev/v1alpha1
+    kind: Transformer
+    name: transformer
+
+---
+
+apiVersion: eip.eventing.knative.dev/v1alpha1
+kind: Transformer
 metadata:
   name: transformer
   namespace: default
 spec:
-  from:
-    apiVersion: eventing.knative.dev/v1alpha1
-    kind: Source
-    name: source
-  call:
+  transformer:
     target:
       apiVersion: serving.knative.dev/v1alpha1
       kind: Service
       # Needs to return multiple messages. Likely talking to Cloud Events and have them support one message containing multiple events.
       name: splitting-function
-  result:
-    target:
-      apiVersion: eventing.knative.dev/v1alpha1
-      kind: Channel
-      name: downstream
+  resultLink: output-link # Name of a Link in the same namespace.
 
+---
+
+apiVersion: eip.eventing.knative.dev/v1alpha1
+kind: Link
+metadata:
+  name: output-link
+  namespace: default
+spec:
+  sink:
+    apiVersion: eventing.knative.dev/v1alpha1
+    kind: Channel
+    name: downstream

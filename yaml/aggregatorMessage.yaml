@@ -6,6 +6,9 @@ metadata:
 spec:
   provisioner:
     ...
+  selector:
+    matchLabels:
+      blue-source: events
 
 ---
 
@@ -17,72 +20,75 @@ metadata:
 spec:
   provisioner:
     ...
+  selector:
+    matchLabels:
+      red-source: events
 
 ---
 
-apiVersion: eventing.knative.dev/v1alpha1
-kind: Channel
+apiVersion: eip.eventing.knative.dev/v1alpha1
+kind: Link
 metadata:
-  name: intermediate
+  name: source-link
   namespace: default
+  labels:
+    blue-source: events
+    red-source: events
 spec:
-  ...
+  sink:
+    apiVersion: eip.eventing.knative.dev/v1alpha1
+    kind: Aggregator
+    name: aggregator
 
 ---
 
-apiVersion: eventing.knative.dev/v1alpha1
-kind: Subscription
+# This will require persistent storage, so maybe isn't something we want to provide as a built-in.
+
+apiVersion: eip.eventing.knative.dev/v1alpha1
+kind: Aggregator
 metadata:
-  name: blue-input
+  name: aggregator
   namespace: default
 spec:
-  from:
-    apiVersion: eventing.knative.dev/v1alpha1
-    kind: Source
-    name: blue-source
-  result:
-    target:
-      apiVersion: eventing.knative.dev/v1alpha1
-      kind: Channel
-      name: intermediate
-
----
-
-apiVersion: eventing.knative.dev/v1alpha1
-kind: Subscription
-metadata:
-  name: red-input
-  namespace: default
-spec:
-  from:
-    apiVersion: eventing.knative.dev/v1alpha1
-    kind: Source
-    name: red-source
-  result:
-      apiVersion: eventing.knative.dev/v1alpha1
-      kind: Channel
-      name: intermediate
-
----
-
-apiVersion: eventing.knative.dev/v1alpha1
-kind: Subscription
-metadata:
-  name: transformer
-  namespace: default
-spec:
-  from:
-    apiVersion: eventing.knative.dev/v1alpha1
-    kind: Channel
-    name: intermediate
+  inputs:
+    blue:
+      # The way to get the 'correlation' ID for this request.
+      correlationKey: $.body.foo.bar
+    red:
+      correlationKey: $.body.baz.qux[0]
+  # Once all of the inputs have been received, send the aggregated events to 
+  # `call`.
   call:
     target:
       apiVersion: serving.knative.dev/v1alpha1
       kind: Service
       name: message-aggregating-function
-  result:
-    target:
-      apiVersion: eventing.knative.dev/v1alpha1
-      kind: Channel
-      name: downstream
+  resultLink: output-link # Name of a Link in the same namespace.
+  timeout: 5m
+  timeoutLink: timeout-link # Name of a Link in the same namespace.
 
+---
+
+apiVersion: eip.eventing.knative.dev/v1alpha1
+kind: Link
+metadata:
+  name: output-link
+  namespace: default
+spec:
+  sink:
+    apiVersion: eventing.knative.dev/v1alpha1
+    kind: Channel
+    name: downstream
+
+---
+
+apiVersion: eip.eventing.knative.dev/v1alpha1
+kind: Link
+metadata:
+  name: timeout-link
+  namespace: default
+spec:
+  sink:
+    apiVersion: eventing.knative.dev/v1alpha1
+    kind: Channel
+    name: timeout-stream

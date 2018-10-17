@@ -6,41 +6,80 @@ metadata:
 spec:
   provisioner:
     ...
+  selector:
+    matchLabels:
+      link-label: source-in
 
 ---
 
-apiVersion: eventing.knative.dev/v1alpha1
-kind: Subscription
+apiVersion: eip.eventing.knative.dev/v1alpha1
+kind: Link
 metadata:
-  name: transformer
+  name: source-link
+  namespace: default
+  labels:
+    link-label: source-in
+spec:
+  sink:
+    apiVersion: eip.eventing.knative.dev/v1alpha1
+    kind: Router
+    name: router
+
+---
+
+apiVersion: eip.eventing.knative.dev/v1alpha1
+kind: Router
+metadata:
+  name: router
   namespace: default
 spec:
-  from:
-    apiVersion: eventing.knative.dev/v1alpha1
-    kind: Source
-    name: source
-  call:
+  router:
     target:
       apiVersion: serving.knative.dev/v1alpha1
       kind: Service
-      # Combination of a transformer and a router. It will return the event to send on, along with a label in a well known location.
       name: routing-function
-  result:
-    targets:
-      # A possible alternative to using a single, well-known location. Allow it to be specified using some language, this example uses JSON Path.
-      labelLookup: $.body.foo.bar[0]
-      # match the label to a key in routes. If there is a match, use that objectRef. If there is no match, then use default.
-      routes:
-        red:
-          apiVersion: eventing.knative.dev/v1alpha1
-          kind: Channel
-          name: red-downstream
-        green:
-          apiVersion: eventing.knative.dev/v1alpha1
-          kind: Channel
-          name: green-downstream
-      default:
-        apiVersion: eventing.knative.dev/v1alpha1
-        kind: Channel
-        name: default-downstream
+  # A possible alternative to using a single, well-known location. Allow it to be specified using some language, this example uses JSON Path.
+  labelLookup: $.body.foo.bar[0]
+  defaultResult: default-result # Name of a Link in the same namespace.
+  results:
+    red: red-result
+    green: green-result
 
+---
+
+apiVersion: eip.eventing.knative.dev/v1alpha1
+kind: Link
+metadata:
+  name: default-result
+  namespace: default
+spec:
+  sink:
+    apiVersion: eventing.knative.dev/v1alpha1
+    kind: Channel
+    name: default-downstream
+
+---
+
+apiVersion: eip.eventing.knative.dev/v1alpha1
+kind: Link
+metadata:
+  name: red-result
+  namespace: default
+spec:
+  sink:
+    apiVersion: eventing.knative.dev/v1alpha1
+    kind: Channel
+    name: red-downstream
+    
+---
+
+apiVersion: eip.eventing.knative.dev/v1alpha1
+kind: Link
+metadata:
+  name: green-result
+  namespace: default
+spec:
+  sink:
+    apiVersion: eventing.knative.dev/v1alpha1
+    kind: Channel
+    name: green-downstream

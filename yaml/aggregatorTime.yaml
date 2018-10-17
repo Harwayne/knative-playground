@@ -6,24 +6,24 @@ metadata:
 spec:
   provisioner:
     ...
+  selector:
+    matchLabels:
+      link-label: source-in
 
 ---
 
-piVersion: eventing.knative.dev/v1alpha1
-kind: Subscription
+apiVersion: eip.eventing.knative.dev/v1alpha1
+kind: Link
 metadata:
-  name: time-aggregator
+  name: source-link
   namespace: default
+  labels:
+    link-label: source-in
 spec:
-  from:
-    apiVersion: eventing.knative.dev/v1alpha1
-    kind: Source
-    name: source
-  call:
-    target:
-      apiVersion: serving.knative.dev/v1alpha1
-      kind: Service
-      name: time-aggregating-function
+  sink:
+    apiVersion: v1
+    kind: Service
+    name: time-aggregating-function
 
 ---
 
@@ -40,5 +40,34 @@ spec:
     image: gcr.io/...
     timeWindow: 5m
     arguments:
-      - --downstreamDomain=downstream.default.svc.cluster.local
+      # Hand crafted to match the Channel's K8s service.
+      - --outputChannel=time-aggregating-function-channel.default.svc.cluster.local
+
+---
+
+apiVersion: eventing.knative.dev/v1alpha1
+kind: Channel
+metadata:
+  name: time-aggregating-function-channel
+  namespace: default
+spec:
+  ...
+  selector:
+    matchLabels:
+      time-aggregating-function: output
+
+---
+
+apiVersion: eip.eventing.knative.dev/v1alpha1
+kind: Link
+metadata:
+  name: output-link
+  namespace: default
+  labels:
+    time-aggregating-function: output
+spec:
+  sink:
+    apiVersion: eventing.knative.dev/v1alpha1
+    kind: Channel
+    name: downstream
 

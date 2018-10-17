@@ -1,0 +1,60 @@
+apiVersion: eventing.knative.dev/v1alpha1
+kind: Source
+metadata:
+  name: source
+  namespace: default
+spec:
+  provisioner:
+    ...
+  selector:
+    matchLabels:
+      link-label: source-in
+
+---
+
+apiVersion: eip.eventing.knative.dev/v1alpha1
+kind: Link
+metadata:
+  name: source-link
+  namespace: default
+  labels:
+    link-label: source-in
+spec:
+  sink:
+    apiVersion: eip.eventing.knative.dev/v1alpha1
+    kind: Transformer
+    name: transformer
+
+---
+
+# The user installs the 'eip' batteries portion of Knative eventing which runs
+# very similar to the existing in-memory channel. There is a single dispatcher
+# service capable of handling any transform request. And a controller that 
+# watches for Transformers, creating the needed K8s Service and Istio 
+# VirtualService and getting the config to the dispatcher.
+#
+# The Transformer will fill in its Sinkable interface with a pointer to the K8s
+# Service created for it.
+#
+# The Transformer 'function' calls the transforming-function and is responsible
+# for sending it to the named resultLink, 'output-link'. It only ACKs the
+# original request after the resultLink ACKs.
+#
+# This feels like transform is a very special case of Channel. No fanout, but
+# the message 'disappears' into the service and pops out the other side in a way
+# that can't really be seen by inspecting just the resulting lower-level objects
+# (i.e. don't look at the original Transformer, just the resulting links).
+
+---
+
+apiVersion: eip.eventing.knative.dev/v1alpha1
+kind: Link
+metadata:
+  name: output-link
+  namespace: default
+spec:
+  sink:
+    apiVersion: eventing.knative.dev/v1alpha1
+    kind: Channel
+    name: downstream
+
