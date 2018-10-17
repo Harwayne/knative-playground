@@ -1,7 +1,18 @@
 apiVersion: eventing.knative.dev/v1alpha1
 kind: Source
 metadata:
-  name: source
+  name: blue-source
+  namespace: default
+spec:
+  provisioner:
+    ...
+
+---
+
+apiVersion: eventing.knative.dev/v1alpha1
+kind: Source
+metadata:
+  name: red-source
   namespace: default
 spec:
   provisioner:
