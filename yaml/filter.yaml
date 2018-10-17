@@ -6,6 +6,20 @@ metadata:
 spec:
   provisioner:
     ...
+  channel:
+    apiVersion: eventing.knative.dev/v1alpha1
+    kind: Channel
+    name: source-channel
+
+---
+
+apiVersion: eventing.knative.dev/v1alpha1
+kind: Channel
+metadata:
+  name: source-channel
+  namespace: default
+spec:
+  ...
 
 ---
 
@@ -17,8 +31,8 @@ metadata:
 spec:
   from:
     apiVersion: eventing.knative.dev/v1alpha1
-    kind: Source
-    name: source
+    kind: Channel
+    name: source-channel
   call:
     target:
       apiVersion: serving.knative.dev/v1alpha1

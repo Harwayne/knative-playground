@@ -6,6 +6,20 @@ metadata:
 spec:
   provisioner:
     ...
+  channel:
+    apiVersion: eventing.knative.dev/v1alpha1
+    kind: Channel
+    name: blue-source-channel
+
+---
+
+apiVersion: eventing.knative.dev/v1alpha1
+kind: Channel
+metadata:
+  name: blue-source-channel
+  namespace: default
+spec:
+  ...
 
 ---
 
@@ -17,6 +31,20 @@ metadata:
 spec:
   provisioner:
     ...
+  channel:
+    apiVersion: eventing.knative.dev/v1alpha1
+    kind: Channel
+    name: red-source-channel
+
+---
+
+apiVersion: eventing.knative.dev/v1alpha1
+kind: Channel
+metadata:
+  name: red-source-channel
+  namespace: default
+spec:
+  ...
 
 ---
 
@@ -38,8 +66,8 @@ metadata:
 spec:
   from:
     apiVersion: eventing.knative.dev/v1alpha1
-    kind: Source
-    name: blue-source
+    kind: Channel
+    name: blue-source-channel
   result:
     target:
       apiVersion: eventing.knative.dev/v1alpha1
@@ -56,8 +84,8 @@ metadata:
 spec:
   from:
     apiVersion: eventing.knative.dev/v1alpha1
-    kind: Source
-    name: red-source
+    kind: Channel
+    name: red-source-channel
   result:
       apiVersion: eventing.knative.dev/v1alpha1
       kind: Channel
