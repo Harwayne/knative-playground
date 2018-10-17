@@ -1,0 +1,44 @@
+apiVersion: eventing.knative.dev/v1alpha1
+kind: Source
+metadata:
+  name: source
+  namespace: default
+spec:
+  provisioner:
+    ...
+
+---
+
+piVersion: eventing.knative.dev/v1alpha1
+kind: Subscription
+metadata:
+  name: time-aggregator
+  namespace: default
+spec:
+  from:
+    apiVersion: eventing.knative.dev/v1alpha1
+    kind: Source
+    name: source
+  call:
+    target:
+      apiVersion: serving.knative.dev/v1alpha1
+      kind: Service
+      name: time-aggregating-function
+
+---
+
+# This deployment takes in messages for a time period, responding with nothing. Then at the end of the time period, it sends a single message to downstreamDomain with a synopsis of all the messages that came in during that window.
+
+apiVersion: v1
+kind: Deployment
+metadata:
+  name: time-aggregating-function
+  namespace: default
+spec:
+  replicas: 1
+  podSpec:
+    image: gcr.io/...
+    timeWindow: 5m
+    arguments:
+      - --downstreamDomain=downstream.default.svc.cluster.local
+
