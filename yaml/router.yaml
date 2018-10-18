@@ -33,17 +33,19 @@ metadata:
   name: router
   namespace: default
 spec:
-  router:
-    target:
-      apiVersion: serving.knative.dev/v1alpha1
-      kind: Service
-      name: routing-function
+  # Returns a label string in the body of the response.
+  labeler:
+    apiVersion: serving.knative.dev/v1alpha1
+    kind: Service
+    name: routing-function
   # A possible alternative to using a single, well-known location. Allow it to be specified using some language, this example uses JSON Path.
   labelLookup: $.body.foo.bar[0]
-  defaultResult: default-result # Name of a Link in the same namespace.
   results:
-    red: red-result
-    green: green-result
+  - label: red
+    linkName: red-result
+  - label: green
+    linkName: green-result
+  defaultResult: default-result
 
 ---
 
