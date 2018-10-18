@@ -21,50 +21,30 @@ metadata:
     link-label: source-in
 spec:
   sink:
-    apiVersion: v1
-    kind: Service
-    name: time-aggregating-function
+    apiVersion: eip.eventing.knative.dev/v1alpha1
+    kind: TimeAggregator
+    name: time-aggregator
 
 ---
 
-# This deployment takes in messages for a time period, responding with nothing. Then at the end of the time period, it sends a single message to downstreamDomain with a synopsis of all the messages that came in during that window.
 
-apiVersion: v1
-kind: Deployment
+apiVersion: eip.eventing.knative.dev/v1alpha1
+kind: TimeAggregator
 metadata:
-  name: time-aggregating-function
+  name: time-aggregator
   namespace: default
 spec:
-  replicas: 1
-  podSpec:
-    image: gcr.io/...
-    timeWindow: 5m
-    arguments:
-      # Hand crafted to match the Channel's K8s service.
-      - --outputChannel=time-aggregating-function-channel.default.svc.cluster.local
+  fixedWindow: 5m
+  aggregateLink: output-link
 
 ---
 
-apiVersion: eventing.knative.dev/v1alpha1
-kind: Channel
-metadata:
-  name: time-aggregating-function-channel
-  namespace: default
-spec:
-  ...
-  selector:
-    matchLabels:
-      time-aggregating-function: output
-
----
 
 apiVersion: eip.eventing.knative.dev/v1alpha1
 kind: Link
 metadata:
   name: output-link
   namespace: default
-  labels:
-    time-aggregating-function: output
 spec:
   sink:
     apiVersion: eventing.knative.dev/v1alpha1
