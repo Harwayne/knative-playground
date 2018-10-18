@@ -42,10 +42,10 @@ spec:
   labelLookup: $.body.foo.bar[0]
   results:
   - label: red
-    linkName: red-result
+    linkName: red-result # Name of a Link in the same namespace.
   - label: green
-    linkName: green-result
-  defaultResult: default-result
+    linkName: green-result # Name of a Link in the same namespace.
+  defaultResult: default-result # Name of a Link in the same namespace.
 
 ---
 
