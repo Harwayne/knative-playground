@@ -1,8 +1,10 @@
 #!/bin/bash
 
-set -u
+if [ -z "$channel" ]; then
+  channel="default-broker.default.svc.cluster.local"
+fi
 
-UUID=$(cat /proc/sys/kernel/random/uuid)
+set -u
 
 CLOUD_EVENT_UNFILLED='{
     "cloudEventsVersion" : "0.1",
@@ -20,7 +22,18 @@ CLOUD_EVENT_UNFILLED='{
 
 CLOUD_EVENT=$(echo "$CLOUD_EVENT_UNFILLED" | sed "s/REPLACE_WITH_EVENT_ID/$UUID/g")
 
-curl -v "http://$channel/" -X POST -H 'Content-Type: application/json' -d "$CLOUD_EVENT"
+traceId=$(cat /proc/sys/kernel/random/uuid)
+traceId="${traceId//-/}"
 
-echo "Sent with eventID $UUID"
+eventId=$(cat /proc/sys/kernel/random/uuid)
+
+curl -v "http://$channel/"  \
+  -X POST \
+  -H "X-B3-Traceid: $traceId" \
+  -H "X-B3-Spanid: ${traceId:17:32}" \
+  -H "X-B3-Flags: 1" \
+  -H 'Content-Type: application/json' \
+  -d "$CLOUD_EVENT"
+
+echo "Sent with eventID $eventId with traceID $traceId"
 
