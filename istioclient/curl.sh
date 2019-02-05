@@ -32,7 +32,7 @@ curl -v "http://$channel/"  \
   -H "X-B3-Traceid: $traceId" \
   -H "X-B3-Spanid: ${traceId:17:32}" \
   -H "X-B3-Flags: 1" \
-  -H 'Content-Type: application/json' \
+  -H 'Content-Type: application/cloudevents+json' \
   -d "$CLOUD_EVENT"
 
 echo "Sent with eventID $eventId with traceID $traceId"
