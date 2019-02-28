@@ -1,0 +1,36 @@
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mutator-svc
+spec:
+  selector:
+    app: event-mutator
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: event-mutator
+spec:
+  replicas: 1
+  selector:
+    matchLabels: &labels
+      app: event-mutator
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels: *labels
+    spec:
+      containers:
+        - name: user-container
+          image: github.com/knative/playground/cmd/event_mutator
+          ports:
+            - containerPort: 8080
+
