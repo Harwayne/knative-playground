@@ -6,6 +6,7 @@ import (
 	"github.com/satori/go.uuid"
 	"go.uber.org/zap"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -51,9 +52,10 @@ type eventMutatorHandler struct {
 
 func (e *eventMutatorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h := fromHTTPHeaders(r.Header)
-	h["ce-eventtype"] = "mutated"
+	h["Ce-Eventtype"] = "mutated"
 	for n, v := range h {
 		w.Header()[n] = []string{v}
+		log.Printf("%v: %v", n, v)
 	}
 
 	id := uuid.Must(uuid.NewV4())
@@ -67,9 +69,12 @@ func (e *eventMutatorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 
 	body := string(bb)
 	nb := strings.Replace(body, "{", fmt.Sprintf("{ \"I-Have-Mutated\": \"%v\",", id), 1)
-	w.Write([]byte(nb))
-	w.WriteHeader(http.StatusOK)
-	e.logger.Info("Successfully mutated event", zap.Any("id", id))
+	n, err := w.Write([]byte(nb))
+	if err != nil {
+		e.logger.Info("Write failed", zap.Error(err))
+		return
+	}
+	e.logger.Info("Successfully mutated event", zap.Any("id", id), zap.Int("n", n), zap.Any("w", w))
 }
 
 func fromHTTPHeaders(headers http.Header) map[string]string {
