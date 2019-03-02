@@ -1,7 +1,10 @@
 #!/bin/bash
 
-vars="export channel=$channel; export eventType=$eventType; export eventSource=$eventSource"
-cmd="${vars}; /curl-http.sh;"
+vars="export channel=$channel; "
+vars+="export eventType=$eventType; "
+vars+="export eventSource=$eventSource; "
+vars+="export quote=$quote; "
+cmd="${vars} /curl-http.sh;"
 
 echo "$cmd"
 

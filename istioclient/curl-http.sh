@@ -12,6 +12,12 @@ if [ -z "$eventSource" ]; then
   eventSource="/mycontext/subcontext"
 fi
 
+if [ "$quote" = "none" ]; then
+  quote=""
+else
+  quote="\""
+fi
+
 set -u
 
 traceId=$(cat /proc/sys/kernel/random/uuid)
@@ -21,14 +27,14 @@ eventId=$(cat /proc/sys/kernel/random/uuid)
 
 curl -v "http://$channel/" \
   -X POST \
-  -H "X-B3-Traceid: $traceId" \
+  -H "X-B3-Traceid: ${traceId}" \
   -H "X-B3-Spanid: ${traceId:17:32}" \
   -H "X-B3-Flags: 1" \
-  -H 'CE-CloudEventsVersion: "0.1"' \
-  -H "CE-EventType: \"$eventType\"" \
-  -H 'CE-EventTime: "2018-04-05T03:56:24Z"' \
-  -H "CE-EventID: \"$eventId\"" \
-  -H "CE-Source: \"$eventSource\"" \
+  -H "CE-CloudEventsVersion: ${quote}0.1${quote}" \
+  -H "CE-EventType: ${quote}${eventType}${quote}" \
+  -H "CE-EventTime: ${quote}2018-04-05T03:56:24Z${quote}" \
+  -H "CE-EventID: ${quote}${eventId}${quote}" \
+  -H "CE-Source: ${quote}${eventSource}${quote}" \
   -H 'Content-Type: application/json' \
   -d '{ "much": "wow" }'
 
