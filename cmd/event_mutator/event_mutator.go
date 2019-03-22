@@ -9,6 +9,8 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"go.opencensus.io/plugin/ochttp"
+	"go.opencensus.io/plugin/ochttp/propagation/b3"
 )
 
 // Copied from MessageReceiver.
@@ -36,11 +38,15 @@ func main() {
 		panic(err)
 	}
 
-	s := &http.Server{
-		Addr: ":8080",
+	h := &ochttp.Handler{
+		Propagation: &b3.HTTPFormat{},
 		Handler: &eventMutatorHandler{
 			logger: logger,
 		},
+	}
+	s := &http.Server{
+		Addr: ":8080",
+		Handler: h,
 		ErrorLog:     zap.NewStdLog(logger),
 	}
 	s.ListenAndServe()
@@ -58,7 +64,7 @@ func (e *eventMutatorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		log.Printf("%v: %v", n, v)
 	}
 
-	id := uuid.Must(uuid.NewV4())
+	id := uuid.NewV4()
 
 	bb, err := ioutil.ReadAll(r.Body)
 	if err != nil {
