@@ -58,7 +58,7 @@ type eventMutatorHandler struct {
 
 func (e *eventMutatorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h := fromHTTPHeaders(r.Header)
-	h["Ce-Eventtype"] = "mutated"
+	h["Ce-Type"] = "mutated"
 	for n, v := range h {
 		w.Header()[n] = []string{v}
 		log.Printf("%v: %v", n, v)
