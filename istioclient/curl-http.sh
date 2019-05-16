@@ -28,7 +28,7 @@ eventId=$(cat /proc/sys/kernel/random/uuid)
 curl -v "http://$channel/" \
   -X POST \
   -H "X-B3-Traceid: ${traceId}" \
-  -H "X-B3-Spanid: ${traceId:17:32}" \
+  -H "X-B3-Spanid: ${traceId:16}" \
   -H "X-B3-Flags: 1" \
   -H "CE-CloudEventsVersion: ${quote}0.1${quote}" \
   -H "CE-EventType: ${quote}${eventType}${quote}" \
