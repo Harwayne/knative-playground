@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: message-dumper
+spec:
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: message-dumper
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: message-dumper
+spec:
+  replicas: 1
+  selector:
+    matchLabels: &labels
+      app: message-dumper
+  template:
+    metadata:
+      labels: *labels
+    spec:
+      containers:
+        - image: github.com/knative/playground/cmd/dumper
+          name: user-container
+          ports:
+            - containerPort: 8080
+              protocol: TCP
