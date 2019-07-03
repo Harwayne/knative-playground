@@ -4,6 +4,10 @@ if [ -z "$channel" ]; then
   channel="default-broker.default.svc.cluster.local"
 fi
 
+if [ -z "$uri" ]; then
+  uri="http://$channel/"
+fi
+
 if [ -z "$eventType" ]; then
   eventType="com.example.someevent"
 fi
@@ -25,7 +29,7 @@ traceId="${traceId//-/}"
 
 eventId=$(cat /proc/sys/kernel/random/uuid)
 
-curl -v "http://$channel/" \
+curl -v "$uri" \
   -X POST \
   -H "X-B3-Traceid: ${traceId}" \
   -H "X-B3-Spanid: ${traceId:16}" \
