@@ -10,7 +10,7 @@ metadata:
 spec:
   containers:
   - image: harwayne/istioclient
-    imagePullPolicy: IfNotPresent
+    imagePullPolicy: Always
     name: client
     resources:
       requests:
@@ -22,3 +22,4 @@ spec:
     tty: true
   dnsPolicy: ClusterFirst
   restartPolicy: Never
+

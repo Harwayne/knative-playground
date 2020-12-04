@@ -1,0 +1,13 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: event-display-ksvc
+spec:
+  template:
+    spec:
+      containers:
+        - name: user-container
+          image: knative.dev/eventing-contrib/cmd/event_display
+          ports:
+            - containerPort: 8080
+

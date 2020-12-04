@@ -4,18 +4,16 @@ if [ -z "$channel" ]; then
   channel="default-broker.default.svc.cluster.local"
 fi
 
+if [ -z "$uri" ]; then
+  uri="http://$channel/"
+fi
+
 if [ -z "$eventType" ]; then
   eventType="com.example.someevent"
 fi
 
 if [ -z "$eventSource" ]; then
   eventSource="/mycontext/subcontext"
-fi
-
-if [ "$quote" = "none" ]; then
-  quote=""
-else
-  quote="\""
 fi
 
 set -u
@@ -25,16 +23,16 @@ traceId="${traceId//-/}"
 
 eventId=$(cat /proc/sys/kernel/random/uuid)
 
-curl -v "http://$channel/" \
+curl -v "$uri" \
   -X POST \
   -H "X-B3-Traceid: ${traceId}" \
   -H "X-B3-Spanid: ${traceId:16}" \
   -H "X-B3-Flags: 1" \
-  -H "CE-CloudEventsVersion: ${quote}0.1${quote}" \
-  -H "CE-EventType: ${quote}${eventType}${quote}" \
-  -H "CE-EventTime: ${quote}2018-04-05T03:56:24Z${quote}" \
-  -H "CE-EventID: ${quote}${eventId}${quote}" \
-  -H "CE-Source: ${quote}${eventSource}${quote}" \
+  -H "ce-specversion: 1.0" \
+  -H "ce-type: ${eventType}" \
+  -H "ce-time: 2018-04-05T03:56:24Z" \
+  -H "ce-id: ${eventId}" \
+  -H "ce-source: ${eventSource}" \
   -H 'Content-Type: application/json' \
   -d '{ "much": "wow" }'
 
