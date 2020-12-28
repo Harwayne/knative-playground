@@ -5,7 +5,7 @@ if [ -z "$channel" ]; then
 fi
 
 if [ -z "$uri" ]; then
-  uri="http://$channel/"
+  uri="http://$channel"
 fi
 
 if [ -z "$eventType" ]; then
